@@ -13,9 +13,9 @@ var (
 		"Number of requested bytes for NFSv3 operations",
 		[]string{"direction", "exportid", "path"}, nil,
 	)
-	nfsV3TransferedDesc = prometheus.NewDesc(
-		"ganesha_exports_nfs_v3_transfered_bytes_total",
-		"Number of transfered bytes for NFSv3 operations",
+	nfsV3TransferredDesc = prometheus.NewDesc(
+		"ganesha_exports_nfs_v3_transferred_bytes_total",
+		"Number of transferred bytes for NFSv3 operations",
 		[]string{"direction", "exportid", "path"}, nil,
 	)
 	nfsV3OperationsDesc = prometheus.NewDesc(
@@ -43,9 +43,9 @@ var (
 		"Number of requested bytes for NFSv4.0 operations",
 		[]string{"direction", "exportid", "path"}, nil,
 	)
-	nfsV40TransferedDesc = prometheus.NewDesc(
-		"ganesha_exports_nfs_v40_transfered_bytes_total",
-		"Number of transfered bytes for NFSv4.0 operations",
+	nfsV40TransferredDesc = prometheus.NewDesc(
+		"ganesha_exports_nfs_v40_transferred_bytes_total",
+		"Number of transferred bytes for NFSv4.0 operations",
 		[]string{"direction", "exportid", "path"}, nil,
 	)
 	nfsV40OperationsDesc = prometheus.NewDesc(
@@ -73,9 +73,9 @@ var (
 		"Number of requested bytes for NFSv4.1 operations",
 		[]string{"direction", "exportid", "path"}, nil,
 	)
-	nfsV41TransferedDesc = prometheus.NewDesc(
-		"ganesha_exports_nfs_v41_transfered_bytes_total",
-		"Number of transfered bytes for NFSv4.1 operations",
+	nfsV41TransferredDesc = prometheus.NewDesc(
+		"ganesha_exports_nfs_v41_transferred_bytes_total",
+		"Number of transferred bytes for NFSv4.1 operations",
 		[]string{"direction", "exportid", "path"}, nil,
 	)
 	nfsV41OperationsDesc = prometheus.NewDesc(
@@ -155,9 +155,9 @@ func (ic ExportsCollector) Collect(ch chan<- prometheus.Metric) {
 				float64(stats.Read.Requested),
 				"read", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				nfsV3TransferedDesc,
+				nfsV3TransferredDesc,
 				prometheus.CounterValue,
-				float64(stats.Read.Transfered),
+				float64(stats.Read.Transferred),
 				"read", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
 				nfsV3OperationsDesc,
@@ -185,9 +185,9 @@ func (ic ExportsCollector) Collect(ch chan<- prometheus.Metric) {
 				float64(stats.Write.Requested),
 				"write", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				nfsV3TransferedDesc,
+				nfsV3TransferredDesc,
 				prometheus.CounterValue,
-				float64(stats.Write.Transfered),
+				float64(stats.Write.Transferred),
 				"write", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
 				nfsV3OperationsDesc,
@@ -221,9 +221,9 @@ func (ic ExportsCollector) Collect(ch chan<- prometheus.Metric) {
 				float64(stats.Read.Requested),
 				"read", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				nfsV40TransferedDesc,
+				nfsV40TransferredDesc,
 				prometheus.CounterValue,
-				float64(stats.Read.Transfered),
+				float64(stats.Read.Transferred),
 				"read", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
 				nfsV40OperationsDesc,
@@ -251,9 +251,9 @@ func (ic ExportsCollector) Collect(ch chan<- prometheus.Metric) {
 				float64(stats.Write.Requested),
 				"write", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				nfsV40TransferedDesc,
+				nfsV40TransferredDesc,
 				prometheus.CounterValue,
-				float64(stats.Write.Transfered),
+				float64(stats.Write.Transferred),
 				"write", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
 				nfsV40OperationsDesc,
@@ -287,9 +287,9 @@ func (ic ExportsCollector) Collect(ch chan<- prometheus.Metric) {
 				float64(stats.Read.Requested),
 				"read", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				nfsV41TransferedDesc,
+				nfsV41TransferredDesc,
 				prometheus.CounterValue,
-				float64(stats.Read.Transfered),
+				float64(stats.Read.Transferred),
 				"read", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
 				nfsV41OperationsDesc,
@@ -317,9 +317,9 @@ func (ic ExportsCollector) Collect(ch chan<- prometheus.Metric) {
 				float64(stats.Write.Requested),
 				"write", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				nfsV41TransferedDesc,
+				nfsV41TransferredDesc,
 				prometheus.CounterValue,
-				float64(stats.Write.Transfered),
+				float64(stats.Write.Transferred),
 				"write", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
 				nfsV41OperationsDesc,

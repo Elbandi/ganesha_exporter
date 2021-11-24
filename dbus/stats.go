@@ -10,7 +10,7 @@ var Gandi = false
 // Each field is a counter
 type BasicIO struct {
 	Requested  uint64
-	Transfered uint64
+	Transferred uint64
 	Total      uint64
 	Errors     uint64
 	Latency    uint64
