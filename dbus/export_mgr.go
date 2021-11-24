@@ -54,7 +54,12 @@ func (mgr ExportMgr) ShowExports() (unix.Timespec, []Export) {
 
 func (mgr ExportMgr) GetNFSv3IO(exportID uint32) BasicStats {
 	out := BasicStats{}
-	call := mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv3IO", 0, exportID)
+	var call *dbus.Call
+	if Gandi {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv3IO", 0, exportID)
+	} else {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv3IO", 0, uint16(exportID))
+	}
 	if call.Err != nil {
 		log.Panic(call.Err)
 	}
@@ -75,7 +80,12 @@ func (mgr ExportMgr) GetNFSv3IO(exportID uint32) BasicStats {
 
 func (mgr ExportMgr) GetNFSv40IO(exportID uint32) BasicStats {
 	out := BasicStats{}
-	call := mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv40IO", 0, exportID)
+	var call *dbus.Call
+	if Gandi {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv40IO", 0, exportID)
+	} else {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv40IO", 0, uint16(exportID))
+	}
 	if call.Err != nil {
 		log.Panic(call.Err)
 	}
@@ -96,7 +106,12 @@ func (mgr ExportMgr) GetNFSv40IO(exportID uint32) BasicStats {
 
 func (mgr ExportMgr) GetNFSv41IO(exportID uint32) BasicStats {
 	out := BasicStats{}
-	call := mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41IO", 0, exportID)
+	var call *dbus.Call
+	if Gandi {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41IO", 0, exportID)
+	} else {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41IO", 0, uint16(exportID))
+	}
 	if call.Err != nil {
 		log.Panic(call.Err)
 	}
@@ -127,7 +142,12 @@ func (mgr ExportMgr) GetNFSv41IO(exportID uint32) BasicStats {
 
 func (mgr ExportMgr) GetNFSv41Layouts(exportID uint32) PNFSOperations {
 	out := PNFSOperations{}
-	call := mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41Layouts", 0, exportID)
+	var call *dbus.Call
+	if Gandi {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41Layouts", 0, exportID)
+	} else {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41Layouts", 0, uint16(exportID))
+	}
 	if call.Err != nil {
 		log.Panic(call.Err)
 	}
