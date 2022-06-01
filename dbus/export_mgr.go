@@ -165,3 +165,65 @@ func (mgr ExportMgr) GetNFSv41Layouts(exportID uint32) PNFSOperations {
 	}
 	return out
 }
+
+func (mgr ExportMgr) GetNFSv42IO(exportID uint32) BasicStats {
+	out := BasicStats{}
+	var call *dbus.Call
+	if Gandi {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv42IO", 0, exportID)
+	} else {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv42IO", 0, uint16(exportID))
+	}
+	if call.Err != nil {
+		log.Panic(call.Err)
+	}
+	if !call.Body[0].(bool) {
+		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
+			log.Panic(err)
+		}
+		return out
+	}
+	if Gandi {
+		if err := call.Store(
+			&out.Status, &out.Error, &out.Time,
+			&out.Read, &out.Write,
+			&out.Open, &out.Close, &out.Getattr, &out.Lock,
+		); err != nil {
+			log.Panic(err)
+		}
+	} else {
+		if err := call.Store(
+			&out.Status, &out.Error, &out.Time,
+			&out.Read, &out.Write,
+		); err != nil {
+			log.Panic(err)
+		}
+	}
+	return out
+}
+
+func (mgr ExportMgr) GetNFSv42Layouts(exportID uint32) PNFSOperations {
+	out := PNFSOperations{}
+	var call *dbus.Call
+	if Gandi {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv42Layouts", 0, exportID)
+	} else {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv42Layouts", 0, uint16(exportID))
+	}
+	if call.Err != nil {
+		log.Panic(call.Err)
+	}
+	if !call.Body[0].(bool) {
+		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
+			log.Panic(err)
+		}
+		return out
+	}
+	if err := call.Store(
+		&out.Status, &out.Error, &out.Time,
+		&out.Getdevinfo, &out.LayoutGet, &out.LayoutCommit, &out.LayoutReturn, &out.LayoutRecall,
+	); err != nil {
+		log.Panic(err)
+	}
+	return out
+}

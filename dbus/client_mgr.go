@@ -144,3 +144,55 @@ func (mgr ClientMgr) GetNFSv41Layouts(ipaddr string) PNFSOperations {
 	}
 	return out
 }
+
+func (mgr ClientMgr) GetNFSv42IO(ipaddr string) BasicStats {
+	out := BasicStats{}
+	call := mgr.dbusObject.Call("org.ganesha.nfsd.clientstats.GetNFSv42IO", 0, ipaddr)
+	if call.Err != nil {
+		log.Panic(call.Err)
+	}
+	if !call.Body[0].(bool) {
+		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
+			log.Panic(err)
+		}
+		return out
+	}
+	if Gandi {
+		if err := call.Store(
+			&out.Status, &out.Error, &out.Time,
+			&out.Read, &out.Write,
+			&out.Open, &out.Close, &out.Getattr, &out.Lock,
+		); err != nil {
+			log.Panic(err)
+		}
+	} else {
+		if err := call.Store(
+			&out.Status, &out.Error, &out.Time,
+			&out.Read, &out.Write,
+		); err != nil {
+			log.Panic(err)
+		}
+	}
+	return out
+}
+
+func (mgr ClientMgr) GetNFSv42Layouts(ipaddr string) PNFSOperations {
+	out := PNFSOperations{}
+	call := mgr.dbusObject.Call("org.ganesha.nfsd.clientstats.GetNFSv42Layouts", 0, ipaddr)
+	if call.Err != nil {
+		log.Panic(call.Err)
+	}
+	if !call.Body[0].(bool) {
+		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
+			log.Panic(err)
+		}
+		return out
+	}
+	if err := call.Store(
+		&out.Status, &out.Error, &out.Time,
+		&out.Getdevinfo, &out.LayoutGet, &out.LayoutCommit, &out.LayoutReturn, &out.LayoutRecall,
+	); err != nil {
+		log.Panic(err)
+	}
+	return out
+}
