@@ -98,17 +98,17 @@ var (
 		"Cumulative time spent in rpc wait queue for NFSv4.1",
 		[]string{"direction", "exportid", "path"}, nil,
 	)
-	pnfsLayoutOperationsDesc = prometheus.NewDesc(
+	pnfsV41LayoutOperationsDesc = prometheus.NewDesc(
 		"ganesha_exports_pnfs_v41_layout_operations_total",
 		"Numer of layout operations for pNFSv4.1",
 		[]string{"type", "exportid", "path"}, nil,
 	)
-	pnfsLayoutErrorsDesc = prometheus.NewDesc(
+	pnfsV41LayoutErrorsDesc = prometheus.NewDesc(
 		"ganesha_exports_pnfs_v41_layout_operations_errors_total",
 		"Numer of layout operations in error for pNFSv4.1",
 		[]string{"type", "exportid", "path"}, nil,
 	)
-	pnfsLayoutDelayDesc = prometheus.NewDesc(
+	pnfsV41LayoutDelayDesc = prometheus.NewDesc(
 		"ganesha_exports_pnfs_v41_layout_delay_seconds_total",
 		"Cumulative delay time for pNFSv4.1",
 		[]string{"direction", "exportid", "path"}, nil,
@@ -348,77 +348,77 @@ func (ic ExportsCollector) Collect(ch chan<- prometheus.Metric) {
 				stats = ic.exportMgr.GetNFSv41Layouts(export.ExportID)
 			}
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutOperationsDesc,
+				pnfsV41LayoutOperationsDesc,
 				prometheus.CounterValue,
 				float64(stats.Getdevinfo.Total),
 				"getdevinfo", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutErrorsDesc,
+				pnfsV41LayoutErrorsDesc,
 				prometheus.CounterValue,
 				float64(stats.Getdevinfo.Errors),
 				"getdevinfo", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutDelayDesc,
+				pnfsV41LayoutDelayDesc,
 				prometheus.CounterValue,
 				float64(stats.Getdevinfo.Delays)/1e9,
 				"getdevinfo", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutOperationsDesc,
+				pnfsV41LayoutOperationsDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutGet.Total),
 				"get", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutErrorsDesc,
+				pnfsV41LayoutErrorsDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutGet.Errors),
 				"get", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutDelayDesc,
+				pnfsV41LayoutDelayDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutGet.Delays)/1e9,
 				"get", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutOperationsDesc,
+				pnfsV41LayoutOperationsDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutCommit.Total),
 				"commit", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutErrorsDesc,
+				pnfsV41LayoutErrorsDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutCommit.Errors),
 				"commit", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutDelayDesc,
+				pnfsV41LayoutDelayDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutCommit.Delays)/1e9,
 				"commit", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutOperationsDesc,
+				pnfsV41LayoutOperationsDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutReturn.Total),
 				"return", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutErrorsDesc,
+				pnfsV41LayoutErrorsDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutReturn.Errors),
 				"return", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutDelayDesc,
+				pnfsV41LayoutDelayDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutReturn.Delays)/1e9,
 				"return", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutOperationsDesc,
+				pnfsV41LayoutOperationsDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutRecall.Total),
 				"recall", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutErrorsDesc,
+				pnfsV41LayoutErrorsDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutRecall.Errors),
 				"recall", exportid, path)
 			ch <- prometheus.MustNewConstMetric(
-				pnfsLayoutDelayDesc,
+				pnfsV41LayoutDelayDesc,
 				prometheus.CounterValue,
 				float64(stats.LayoutRecall.Delays)/1e9,
 				"recall", exportid, path)
