@@ -183,437 +183,272 @@ func (ic ClientsCollector) Describe(ch chan<- *prometheus.Desc) {
 	prometheus.DescribeByCollect(ic, ch)
 }
 
+func (ic ClientsCollector) exportNFSStatsIO(ch chan<- prometheus.Metric, client dbus.Client, stats dbus.BasicStats,
+	clientsNfsRequestedDesc *prometheus.Desc,
+	clientsNfsTransferredDesc *prometheus.Desc,
+	clientsNfsOperationsDesc *prometheus.Desc,
+	clientsNfsErrorsDesc *prometheus.Desc,
+	clientsNfsLatencyDesc *prometheus.Desc,
+	clientsNfsQueueWaitDesc *prometheus.Desc,
+) {
+	clientip := client.Client
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsRequestedDesc,
+		prometheus.CounterValue,
+		float64(stats.Read.Requested),
+		"read", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsTransferredDesc,
+		prometheus.CounterValue,
+		float64(stats.Read.Transferred),
+		"read", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsOperationsDesc,
+		prometheus.CounterValue,
+		float64(stats.Read.Total),
+		"read", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsErrorsDesc,
+		prometheus.CounterValue,
+		float64(stats.Read.Errors),
+		"read", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsLatencyDesc,
+		prometheus.CounterValue,
+		float64(stats.Read.Latency)/1e9,
+		"read", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsQueueWaitDesc,
+		prometheus.CounterValue,
+		float64(stats.Read.QueueWait)/1e9,
+		"read", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsRequestedDesc,
+		prometheus.CounterValue,
+		float64(stats.Write.Requested),
+		"write", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsTransferredDesc,
+		prometheus.CounterValue,
+		float64(stats.Write.Transferred),
+		"write", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsOperationsDesc,
+		prometheus.CounterValue,
+		float64(stats.Write.Total),
+		"write", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsErrorsDesc,
+		prometheus.CounterValue,
+		float64(stats.Write.Errors),
+		"write", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsLatencyDesc,
+		prometheus.CounterValue,
+		float64(stats.Write.Latency)/1e9,
+		"write", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsNfsQueueWaitDesc,
+		prometheus.CounterValue,
+		float64(stats.Write.QueueWait)/1e9,
+		"write", clientip)
+}
+
+func (ic ClientsCollector) exportNFSStatsLayouts(ch chan<- prometheus.Metric, client dbus.Client, stats dbus.PNFSOperations,
+	clientsPnfsLayoutOperationsDesc *prometheus.Desc,
+	clientsPnfsLayoutErrorsDesc *prometheus.Desc,
+	clientsPnfsLayoutDelayDesc *prometheus.Desc,
+) {
+	clientip := client.Client
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutOperationsDesc,
+		prometheus.CounterValue,
+		float64(stats.Getdevinfo.Total),
+		"getdevinfo", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutErrorsDesc,
+		prometheus.CounterValue,
+		float64(stats.Getdevinfo.Errors),
+		"getdevinfo", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutDelayDesc,
+		prometheus.CounterValue,
+		float64(stats.Getdevinfo.Delays)/1e9,
+		"getdevinfo", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutOperationsDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutGet.Total),
+		"get", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutErrorsDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutGet.Errors),
+		"get", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutDelayDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutGet.Delays)/1e9,
+		"get", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutOperationsDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutCommit.Total),
+		"commit", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutErrorsDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutCommit.Errors),
+		"commit", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutDelayDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutCommit.Delays)/1e9,
+		"commit", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutOperationsDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutReturn.Total),
+		"return", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutErrorsDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutReturn.Errors),
+		"return", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutDelayDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutReturn.Delays)/1e9,
+		"return", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutOperationsDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutRecall.Total),
+		"recall", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutErrorsDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutRecall.Errors),
+		"recall", clientip)
+	ch <- prometheus.MustNewConstMetric(
+		clientsPnfsLayoutDelayDesc,
+		prometheus.CounterValue,
+		float64(stats.LayoutRecall.Delays)/1e9,
+		"recall", clientip)
+}
+
+func (ic ClientsCollector) collectNFSv3IO(ch chan<- prometheus.Metric, client dbus.Client) bool {
+	var stats dbus.BasicStats
+	if client.NFSv3 {
+		stats = ic.clientMgr.GetNFSv3IO(client.Client)
+	}
+	ic.exportNFSStatsIO(ch, client, stats,
+		clientsNfsV3RequestedDesc,
+		clientsNfsV3TransferredDesc,
+		clientsNfsV3OperationsDesc,
+		clientsNfsV3ErrorsDesc,
+		clientsNfsV3LatencyDesc,
+		clientsNfsV3QueueWaitDesc,
+	)
+	return true
+}
+
+func (ic ClientsCollector) collectNFSv40IO(ch chan<- prometheus.Metric, client dbus.Client) bool {
+	stats := dbus.BasicStats{}
+	if client.NFSv40 {
+		stats = ic.clientMgr.GetNFSv40IO(client.Client)
+	}
+	ic.exportNFSStatsIO(ch, client, stats,
+		clientsNfsV40RequestedDesc,
+		clientsNfsV40TransferredDesc,
+		clientsNfsV40OperationsDesc,
+		clientsNfsV40ErrorsDesc,
+		clientsNfsV40LatencyDesc,
+		clientsNfsV40QueueWaitDesc,
+	)
+	return true
+}
+
+func (ic ClientsCollector) collectNFSv41IO(ch chan<- prometheus.Metric, client dbus.Client) bool {
+	stats := dbus.BasicStats{}
+	if client.NFSv41 {
+		stats = ic.clientMgr.GetNFSv41IO(client.Client)
+	}
+	ic.exportNFSStatsIO(ch, client, stats,
+		clientsNfsV41RequestedDesc,
+		clientsNfsV41TransferredDesc,
+		clientsNfsV41OperationsDesc,
+		clientsNfsV41ErrorsDesc,
+		clientsNfsV41LatencyDesc,
+		clientsNfsV41QueueWaitDesc,
+	)
+	return true
+}
+
+func (ic ClientsCollector) collectNFSv41Layouts(ch chan<- prometheus.Metric, client dbus.Client) bool {
+	stats := dbus.PNFSOperations{}
+	if client.NFSv41 {
+		stats = ic.clientMgr.GetNFSv41Layouts(client.Client)
+	}
+	ic.exportNFSStatsLayouts(ch, client, stats,
+		clientsPnfsV41LayoutOperationsDesc,
+		clientsPnfsV41LayoutErrorsDesc,
+		clientsPnfsV41LayoutDelayDesc,
+	)
+	return true
+}
+
+func (ic ClientsCollector) collectNFSv42IO(ch chan<- prometheus.Metric, client dbus.Client) bool {
+	stats := dbus.BasicStats{}
+	if client.NFSv42 {
+		stats = ic.clientMgr.GetNFSv42IO(client.Client)
+	}
+	ic.exportNFSStatsIO(ch, client, stats,
+		clientsNfsV42RequestedDesc,
+		clientsNfsV42TransferredDesc,
+		clientsNfsV42OperationsDesc,
+		clientsNfsV42ErrorsDesc,
+		clientsNfsV42LatencyDesc,
+		clientsNfsV42QueueWaitDesc,
+	)
+	return true
+}
+
+func (ic ClientsCollector) collectNFSv42Layouts(ch chan<- prometheus.Metric, client dbus.Client) bool {
+	stats := dbus.PNFSOperations{}
+	if client.NFSv42 {
+		stats = ic.clientMgr.GetNFSv42Layouts(client.Client)
+	}
+	ic.exportNFSStatsLayouts(ch, client, stats,
+		clientsPnfsV42LayoutOperationsDesc,
+		clientsPnfsV42LayoutErrorsDesc,
+		clientsPnfsV42LayoutDelayDesc,
+	)
+	return true
+}
+
 // Collect do the actual job
 func (ic ClientsCollector) Collect(ch chan<- prometheus.Metric) {
-	var ()
+	ok := true
 	_, clients := ic.clientMgr.ShowClients()
 	for _, client := range clients {
-		clientip := client.Client
 		if *ic.nfsv3 {
-			var stats dbus.BasicStats
-			if client.NFSv3 {
-				stats = ic.clientMgr.GetNFSv3IO(client.Client)
-			}
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3RequestedDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Requested),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3TransferredDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Transferred),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3OperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Total),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3ErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Errors),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3LatencyDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Latency)/1e9,
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3QueueWaitDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.QueueWait)/1e9,
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3RequestedDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Requested),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3TransferredDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Transferred),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3OperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Total),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3ErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Errors),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3LatencyDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Latency)/1e9,
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV3QueueWaitDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.QueueWait)/1e9,
-				"write", clientip)
+			ok = ic.collectNFSv3IO(ch, client) && ok
 		}
 		if *ic.nfsv40 {
-			stats := dbus.BasicStats{}
-			if client.NFSv40 {
-				stats = ic.clientMgr.GetNFSv40IO(client.Client)
-			}
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40RequestedDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Requested),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40TransferredDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Transferred),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40OperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Total),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40ErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Errors),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40LatencyDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Latency)/1e9,
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40QueueWaitDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.QueueWait)/1e9,
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40RequestedDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Requested),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40TransferredDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Transferred),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40OperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Total),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40ErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Errors),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40LatencyDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Latency)/1e9,
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV40QueueWaitDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.QueueWait)/1e9,
-				"write", clientip)
+			ok = ic.collectNFSv40IO(ch, client) && ok
 		}
 		if *ic.nfsv41 {
-			stats := dbus.BasicStats{}
-			if client.NFSv41 {
-				stats = ic.clientMgr.GetNFSv41IO(client.Client)
-			}
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41RequestedDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Requested),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41TransferredDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Transferred),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41OperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Total),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41ErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Errors),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41LatencyDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Latency)/1e9,
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41QueueWaitDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.QueueWait)/1e9,
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41RequestedDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Requested),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41TransferredDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Transferred),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41OperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Total),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41ErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Errors),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41LatencyDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Latency)/1e9,
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV41QueueWaitDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.QueueWait)/1e9,
-				"write", clientip)
+			ok = ic.collectNFSv41IO(ch, client) && ok
 		}
 		if *ic.pnfsv41 {
-			stats := dbus.PNFSOperations{}
-			if client.NFSv41 {
-				stats = ic.clientMgr.GetNFSv41Layouts(client.Client)
-			}
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Getdevinfo.Total),
-				"getdevinfo", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Getdevinfo.Errors),
-				"getdevinfo", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.Getdevinfo.Delays)/1e9,
-				"getdevinfo", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutGet.Total),
-				"get", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutGet.Errors),
-				"get", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutGet.Delays)/1e9,
-				"get", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutCommit.Total),
-				"commit", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutCommit.Errors),
-				"commit", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutCommit.Delays)/1e9,
-				"commit", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutReturn.Total),
-				"return", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutReturn.Errors),
-				"return", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutReturn.Delays)/1e9,
-				"return", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutRecall.Total),
-				"recall", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutRecall.Errors),
-				"recall", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV41LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutRecall.Delays)/1e9,
-				"recall", clientip)
+			ok = ic.collectNFSv41Layouts(ch, client) && ok
 		}
 		if *ic.nfsv42 {
-			stats := dbus.BasicStats{}
-			if client.NFSv42 {
-				stats = ic.clientMgr.GetNFSv42IO(client.Client)
-			}
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42RequestedDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Requested),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42TransferredDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Transferred),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42OperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Total),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42ErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Errors),
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42LatencyDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.Latency)/1e9,
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42QueueWaitDesc,
-				prometheus.CounterValue,
-				float64(stats.Read.QueueWait)/1e9,
-				"read", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42RequestedDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Requested),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42TransferredDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Transferred),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42OperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Total),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42ErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Errors),
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42LatencyDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.Latency)/1e9,
-				"write", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsNfsV42QueueWaitDesc,
-				prometheus.CounterValue,
-				float64(stats.Write.QueueWait)/1e9,
-				"write", clientip)
+			ok = ic.collectNFSv42IO(ch, client) && ok
 		}
 		if *ic.pnfsv42 {
-			stats := dbus.PNFSOperations{}
-			if client.NFSv42 {
-				stats = ic.clientMgr.GetNFSv42Layouts(client.Client)
-			}
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.Getdevinfo.Total),
-				"getdevinfo", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.Getdevinfo.Errors),
-				"getdevinfo", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.Getdevinfo.Delays)/1e9,
-				"getdevinfo", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutGet.Total),
-				"get", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutGet.Errors),
-				"get", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutGet.Delays)/1e9,
-				"get", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutCommit.Total),
-				"commit", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutCommit.Errors),
-				"commit", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutCommit.Delays)/1e9,
-				"commit", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutReturn.Total),
-				"return", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutReturn.Errors),
-				"return", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutReturn.Delays)/1e9,
-				"return", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutOperationsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutRecall.Total),
-				"recall", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutErrorsDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutRecall.Errors),
-				"recall", clientip)
-			ch <- prometheus.MustNewConstMetric(
-				clientsPnfsV42LayoutDelayDesc,
-				prometheus.CounterValue,
-				float64(stats.LayoutRecall.Delays)/1e9,
-				"recall", clientip)
+			ok = ic.collectNFSv42Layouts(ch, client) && ok
 		}
 	}
 }
