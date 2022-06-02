@@ -52,13 +52,49 @@ func (mgr ExportMgr) ShowExports() (unix.Timespec, []Export) {
 	return utime, exports
 }
 
-func (mgr ExportMgr) GetNFSv3IO(exportID uint32) BasicStats {
+func (mgr ExportMgr) getNFSIO(exportID uint32, callName string, gandi bool) BasicStats {
 	out := BasicStats{}
 	var call *dbus.Call
-	if Gandi {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv3IO", 0, exportID)
+	if gandi {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats."+callName, 0, exportID)
 	} else {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv3IO", 0, uint16(exportID))
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats."+callName, 0, uint16(exportID))
+	}
+	if call.Err != nil {
+		log.Panic(call.Err)
+	}
+	if !call.Body[0].(bool) {
+		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
+			log.Panic(err)
+		}
+		return out
+	}
+	if gandi {
+		if err := call.Store(
+			&out.Status, &out.Error, &out.Time,
+			&out.Read, &out.Write,
+			&out.Open, &out.Close, &out.Getattr, &out.Lock,
+		); err != nil {
+			log.Panic(err)
+		}
+	} else {
+		if err := call.Store(
+			&out.Status, &out.Error, &out.Time,
+			&out.Read, &out.Write,
+		); err != nil {
+			log.Panic(err)
+		}
+	}
+	return out
+}
+
+func (mgr ExportMgr) getNFSLayouts(exportID uint32, callName string, gandi bool) PNFSOperations {
+	out := PNFSOperations{}
+	var call *dbus.Call
+	if gandi {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats."+callName, 0, exportID)
+	} else {
+		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats."+callName, 0, uint16(exportID))
 	}
 	if call.Err != nil {
 		log.Panic(call.Err)
@@ -71,159 +107,32 @@ func (mgr ExportMgr) GetNFSv3IO(exportID uint32) BasicStats {
 	}
 	if err := call.Store(
 		&out.Status, &out.Error, &out.Time,
-		&out.Read, &out.Write,
+		&out.Getdevinfo, &out.LayoutGet, &out.LayoutCommit, &out.LayoutReturn, &out.LayoutRecall,
 	); err != nil {
 		log.Panic(err)
 	}
 	return out
+}
+func (mgr ExportMgr) GetNFSv3IO(exportID uint32) BasicStats {
+	return mgr.getNFSIO(exportID, "GetNFSv3IO", Gandi)
 }
 
 func (mgr ExportMgr) GetNFSv40IO(exportID uint32) BasicStats {
-	out := BasicStats{}
-	var call *dbus.Call
-	if Gandi {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv40IO", 0, exportID)
-	} else {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv40IO", 0, uint16(exportID))
-	}
-	if call.Err != nil {
-		log.Panic(call.Err)
-	}
-	if !call.Body[0].(bool) {
-		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
-			log.Panic(err)
-		}
-		return out
-	}
-	if err := call.Store(
-		&out.Status, &out.Error, &out.Time,
-		&out.Read, &out.Write,
-	); err != nil {
-		log.Panic(err)
-	}
-	return out
+	return mgr.getNFSIO(exportID, "GetNFSv40IO", Gandi)
 }
 
 func (mgr ExportMgr) GetNFSv41IO(exportID uint32) BasicStats {
-	out := BasicStats{}
-	var call *dbus.Call
-	if Gandi {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41IO", 0, exportID)
-	} else {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41IO", 0, uint16(exportID))
-	}
-	if call.Err != nil {
-		log.Panic(call.Err)
-	}
-	if !call.Body[0].(bool) {
-		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
-			log.Panic(err)
-		}
-		return out
-	}
-	if Gandi {
-		if err := call.Store(
-			&out.Status, &out.Error, &out.Time,
-			&out.Read, &out.Write,
-			&out.Open, &out.Close, &out.Getattr, &out.Lock,
-		); err != nil {
-			log.Panic(err)
-		}
-	} else {
-		if err := call.Store(
-			&out.Status, &out.Error, &out.Time,
-			&out.Read, &out.Write,
-		); err != nil {
-			log.Panic(err)
-		}
-	}
-	return out
+	return mgr.getNFSIO(exportID, "GetNFSv41IO", Gandi)
 }
 
 func (mgr ExportMgr) GetNFSv41Layouts(exportID uint32) PNFSOperations {
-	out := PNFSOperations{}
-	var call *dbus.Call
-	if Gandi {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41Layouts", 0, exportID)
-	} else {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv41Layouts", 0, uint16(exportID))
-	}
-	if call.Err != nil {
-		log.Panic(call.Err)
-	}
-	if !call.Body[0].(bool) {
-		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
-			log.Panic(err)
-		}
-		return out
-	}
-	if err := call.Store(
-		&out.Status, &out.Error, &out.Time,
-		&out.Getdevinfo, &out.LayoutGet, &out.LayoutCommit, &out.LayoutReturn, &out.LayoutRecall,
-	); err != nil {
-		log.Panic(err)
-	}
-	return out
+	return mgr.getNFSLayouts(exportID, "GetNFSv41Layouts", Gandi)
 }
 
 func (mgr ExportMgr) GetNFSv42IO(exportID uint32) BasicStats {
-	out := BasicStats{}
-	var call *dbus.Call
-	if Gandi {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv42IO", 0, exportID)
-	} else {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv42IO", 0, uint16(exportID))
-	}
-	if call.Err != nil {
-		log.Panic(call.Err)
-	}
-	if !call.Body[0].(bool) {
-		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
-			log.Panic(err)
-		}
-		return out
-	}
-	if Gandi {
-		if err := call.Store(
-			&out.Status, &out.Error, &out.Time,
-			&out.Read, &out.Write,
-			&out.Open, &out.Close, &out.Getattr, &out.Lock,
-		); err != nil {
-			log.Panic(err)
-		}
-	} else {
-		if err := call.Store(
-			&out.Status, &out.Error, &out.Time,
-			&out.Read, &out.Write,
-		); err != nil {
-			log.Panic(err)
-		}
-	}
-	return out
+	return mgr.getNFSIO(exportID, "GetNFSv42IO", Gandi)
 }
 
 func (mgr ExportMgr) GetNFSv42Layouts(exportID uint32) PNFSOperations {
-	out := PNFSOperations{}
-	var call *dbus.Call
-	if Gandi {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv42Layouts", 0, exportID)
-	} else {
-		call = mgr.dbusObject.Call("org.ganesha.nfsd.exportstats.GetNFSv42Layouts", 0, uint16(exportID))
-	}
-	if call.Err != nil {
-		log.Panic(call.Err)
-	}
-	if !call.Body[0].(bool) {
-		if err := call.Store(&out.Status, &out.Error, &out.Time); err != nil {
-			log.Panic(err)
-		}
-		return out
-	}
-	if err := call.Store(
-		&out.Status, &out.Error, &out.Time,
-		&out.Getdevinfo, &out.LayoutGet, &out.LayoutCommit, &out.LayoutReturn, &out.LayoutRecall,
-	); err != nil {
-		log.Panic(err)
-	}
-	return out
+	return mgr.getNFSLayouts(exportID, "GetNFSv42Layouts", Gandi)
 }
