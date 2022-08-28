@@ -1,0 +1,19 @@
+Source: ganesha-exporter
+Section: devel
+Priority: optional
+Maintainer: Andras Elso <elso.andras@gmail.com>
+Build-Depends: debhelper (>= 11),
+               dh-golang,
+               golang-any
+Standards-Version: 4.2.1
+Homepage: https://github.com/Gandi/ganesha_exporter
+XS-Go-Import-Path: github.com/Gandi/ganesha_exporter
+Testsuite: autopkgtest-pkg-go
+
+Package: ganesha-exporter
+Architecture: any
+Built-Using: ${misc:Built-Using}
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Description: NFS-Ganesha Exporter
+ Prometheus exporter for NFS-Ganesha
