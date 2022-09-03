@@ -1,3 +1,9 @@
+ganesha-exporter (1.0~git20220602.de71534-2) focal; urgency=medium
+
+  * Add systemd service files
+
+ -- Andras Elso <elso.andras@gmail.com>  Sat, 03 Sep 2022 12:04:51 +0000
+
 ganesha-exporter (1.0~git20220602.de71534-1) unstable; urgency=medium
 
   * Initial import
