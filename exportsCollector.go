@@ -169,7 +169,6 @@ type ExportsCollector struct {
 // NewExportsCollector creates a new collector
 func NewExportsCollector() ExportsCollector {
 	return ExportsCollector{
-		exportMgr: dbus.NewExportMgr(),
 		nfsv3:     kingpin.Flag("collector.exports.nfsv3", "Activate NFSv3 stats").Default("true").Bool(),
 		nfsv40:    kingpin.Flag("collector.exports.nfsv40", "Activate NFSv4.0 stats").Default("true").Bool(),
 		nfsv41:    kingpin.Flag("collector.exports.nfsv41", "Activate NFSv4.1 stats").Default("true").Bool(),
@@ -177,6 +176,10 @@ func NewExportsCollector() ExportsCollector {
 		nfsv42:    kingpin.Flag("collector.exports.nfsv42", "Activate NFSv4.2 stats").Default("true").Bool(),
 		pnfsv42:   kingpin.Flag("collector.exports.pnfsv42", "Activate pNFSv4.2 stats").Default("true").Bool(),
 	}
+}
+
+func (ic *ExportsCollector) InitDBus() {
+    ic.exportMgr = dbus.NewExportMgr()
 }
 
 // Describe prometheus description

@@ -29,6 +29,9 @@ func main() {
 
 	dbus.Gandi = *gandi
 
+	ec.InitDBus()
+	cc.InitDBus()
+
 	reg := prometheus.NewPedanticRegistry()
 	reg.MustRegister(
 		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),

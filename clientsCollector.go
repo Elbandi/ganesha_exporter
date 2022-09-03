@@ -168,7 +168,6 @@ type ClientsCollector struct {
 // NewClientsCollector creates a new collector
 func NewClientsCollector() ClientsCollector {
 	return ClientsCollector{
-		clientMgr: dbus.NewClientMgr(),
 		nfsv3:     kingpin.Flag("collector.clients.nfsv3", "Activate NFSv3 stats").Default("true").Bool(),
 		nfsv40:    kingpin.Flag("collector.clients.nfsv40", "Activate NFSv4.0 stats").Default("true").Bool(),
 		nfsv41:    kingpin.Flag("collector.clients.nfsv41", "Activate NFSv4.1 stats").Default("true").Bool(),
@@ -176,6 +175,10 @@ func NewClientsCollector() ClientsCollector {
 		nfsv42:    kingpin.Flag("collector.clients.nfsv42", "Activate NFSv4.2 stats").Default("true").Bool(),
 		pnfsv42:   kingpin.Flag("collector.clients.pnfsv42", "Activate pNFSv4.2 stats").Default("true").Bool(),
 	}
+}
+
+func (ic *ClientsCollector) InitDBus() {
+    ic.clientMgr = dbus.NewClientMgr()
 }
 
 // Describe prometheus description
