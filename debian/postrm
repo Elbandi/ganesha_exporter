@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+  purge)
+        rm -f /var/log/prometheus/prometheus-ganesha-exporter.log \
+              /var/run/prometheus/prometheus-ganesha-exporter.pid
+        ;;
+esac
+
+#DEBHELPER#

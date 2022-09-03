@@ -7,12 +7,15 @@ export GOPATH := /tmp/.go
 export GOCACHE := /tmp/.cache
 export DH_GOLANG_BUILDPKG = github.com/Gandi/ganesha_exporter
 
+BUILDDIR := build
+
 override_dh_auto_configure:
 	go mod tidy
 	dh_auto_configure
 
 override_dh_auto_install:
-	dh_auto_install -- --no-source
+	install -m755 $(BUILDDIR)/bin/ganesha_exporter \
+		debian/prometheus-ganesha-exporter/usr/bin/prometheus-ganesha-exporter
 
 %:
-	dh $@ --buildsystem=golang --with=golang
+	dh $@ --buildsystem=golang --with=golang --builddir=$(BUILDDIR)

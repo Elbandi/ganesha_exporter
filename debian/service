@@ -1,0 +1,12 @@
+[Unit]
+Description=Prometheus exporter for NFS ganesha
+Documentation=https://github.com/Gandi/ganesha_exporter
+
+[Service]
+Restart=always
+User=prometheus
+EnvironmentFile=/etc/default/prometheus-ganesha-exporter
+ExecStart=/usr/bin/prometheus-ganesha-exporter $ARGS
+
+[Install]
+WantedBy=multi-user.target
