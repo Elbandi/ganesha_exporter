@@ -2,18 +2,22 @@ package main
 
 import (
 	"github.com/Gandi/ganesha_exporter/dbus"
-	"github.com/davecgh/go-spew/spew"
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/prometheus/client_golang/prometheus"
+	versioncollector "github.com/prometheus/client_golang/prometheus/collectors/version"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/log"
+	"github.com/prometheus/common/promslog"
+	"github.com/prometheus/common/promslog/flag"
 	"github.com/prometheus/common/version"
-	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/prometheus/exporter-toolkit/web"
+	webflag "github.com/prometheus/exporter-toolkit/web/kingpinflag"
 	"net/http"
+	"os"
 )
 
 func main() {
 	var (
-		listenAddress     = kingpin.Flag("web.listen-address", "Address on which to expose metrics and web interface.").Default(":9587").String()
+		webConfig         = webflag.AddFlags(kingpin.CommandLine, ":9587")
 		metricsPath       = kingpin.Flag("web.telemetry-path", "Path under which to expose metrics.").Default("/metrics").String()
 		gandi             = kingpin.Flag("gandi", "Activate Gandi specific fields").Default("false").Bool()
 		exporterCollector = kingpin.Flag("collector.exports", "Activate exports collector").Default("true").Bool()
@@ -22,10 +26,15 @@ func main() {
 	var clientCollector = kingpin.Flag("collector.clients", "Activate clients collector").Default("true").Bool()
 	cc := NewClientsCollector()
 
-	log.AddFlags(kingpin.CommandLine)
+	promslogConfig := &promslog.Config{}
+	flag.AddFlags(kingpin.CommandLine, promslogConfig)
 	kingpin.Version(version.Print("ctld_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
+	logger := promslog.New(promslogConfig)
+
+	logger.Info("Starting ganesha_exporter", "version", version.Info())
+	logger.Info("Build context", "context", version.BuildContext())
 
 	dbus.Gandi = *gandi
 
@@ -33,6 +42,7 @@ func main() {
 	cc.InitDBus()
 
 	reg := prometheus.NewPedanticRegistry()
+	reg.MustRegister(versioncollector.NewCollector("ganesha_exporter"))
 	reg.MustRegister(
 		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
 		prometheus.NewGoCollector(),
@@ -44,22 +54,29 @@ func main() {
 		reg.MustRegister(cc)
 	}
 	http.Handle(*metricsPath, promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, err := w.Write([]byte(`<html>
-			<head><title>ctld Exporter</title></head>
-			<body>
-			<h1>ctld Exporter</h1>
-			<p><a href="` + *metricsPath + `">Metrics</a></p>
-			</body>
-			</html>`))
-		if err != nil {
-			log.Errorln(err)
+	if *metricsPath != "/" && *metricsPath != "" {
+		landingConfig := web.LandingConfig{
+			Name:        "ganesha_exporter",
+			Description: "Prometheus Exporter for Ganesha nfs servers",
+			Version:     version.Info(),
+			Links: []web.LandingLinks{
+				{
+					Address: *metricsPath,
+					Text:    "Metrics",
+				},
+			},
 		}
-	})
+		landingPage, err := web.NewLandingPage(landingConfig)
+		if err != nil {
+			logger.Error("Error creating landing page", "err", err)
+			os.Exit(1)
+		}
+		http.Handle("/", landingPage)
+	}
 
-	log.Infoln("Listening on", *listenAddress)
-	log.Fatal(http.ListenAndServe(*listenAddress, nil))
-	mgr := dbus.NewExportMgr()
-	time, exports := mgr.ShowExports()
-	spew.Dump(time, exports)
+	srv := &http.Server{}
+	if err := web.ListenAndServe(srv, webConfig, logger); err != nil {
+		logger.Error("Error running HTTP server", "err", err)
+		os.Exit(1)
+	}
 }
