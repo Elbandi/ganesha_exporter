@@ -7,7 +7,7 @@ COPY go.sum ./
 RUN go mod download
 
 COPY *.go ./
-COPY dbus ./dbus
+COPY pkg ./pkg
 
 RUN go build -o /ganesha_exporter
 
