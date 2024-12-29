@@ -1,6 +1,6 @@
 module github.com/Gandi/ganesha_exporter
 
-go 1.12
+go 1.22
 
 require (
 	github.com/davecgh/go-spew v1.1.1
