@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Gandi/ganesha_exporter/pkg/collectors"
 	"github.com/Gandi/ganesha_exporter/pkg/dbus"
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/prometheus/client_golang/prometheus"
@@ -10,6 +11,7 @@ import (
 	"github.com/prometheus/common/promslog/flag"
 	"github.com/prometheus/common/version"
 	"github.com/prometheus/exporter-toolkit/web"
+
 	webflag "github.com/prometheus/exporter-toolkit/web/kingpinflag"
 	"net/http"
 	"os"
@@ -22,9 +24,9 @@ func main() {
 		gandi             = kingpin.Flag("gandi", "Activate Gandi specific fields").Default("false").Bool()
 		exporterCollector = kingpin.Flag("collector.exports", "Activate exports collector").Default("true").Bool()
 	)
-	ec := NewExportsCollector()
+	ec := collectors.NewExportsCollector()
 	var clientCollector = kingpin.Flag("collector.clients", "Activate clients collector").Default("true").Bool()
-	cc := NewClientsCollector()
+	cc := collectors.NewClientsCollector()
 
 	promslogConfig := &promslog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promslogConfig)

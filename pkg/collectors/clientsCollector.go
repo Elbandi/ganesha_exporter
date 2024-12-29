@@ -1,4 +1,4 @@
-package main
+package collectors
 
 import (
 	"github.com/Gandi/ganesha_exporter/pkg/dbus"
